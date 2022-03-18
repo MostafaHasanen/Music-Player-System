@@ -1,0 +1,216 @@
+#include <iostream>
+#include<string>
+#include<vector>
+#include<algorithm>
+#include<iterator>
+#include<Windows.h>
+#include<mmsystem.h>
+#include<direct.h>
+#include <time.h>
+#pragma comment(lib, "Winmm.lib")
+using namespace std;
+typedef vector<string> stringvec;
+void read_dir(const string& name, stringvec& v)
+{
+	string pattern(name);
+	pattern.append("\\*");
+	WIN32_FIND_DATA DATA;
+	HANDLE hFind;
+	if ((hFind = FindFirstFile(pattern.c_str(), &DATA)) != INVALID_HANDLE_VALUE) {
+		do
+		{
+			v.push_back(DATA.cFileName);
+		} while ((FindNextFile(hFind, &DATA)) != 0);
+	}
+}
+
+struct Song {
+	int ID;
+	string name;
+	string artist;
+	string album;
+	int year;
+	string type;
+	string Search;
+	int rate;
+
+};
+
+bool deleteSongs(vector <Song>&, int);
+void Play(vector<Song> & name, int ID);
+void scrample(vector<Song> & v);
+void Stop(vector<Song> name);
+void Next(vector<Song> name);
+void Previous(vector<Song> name);
+void Search(vector<Song> name);
+bool compare(Song s1, Song s2);
+void displaySongs(vector<Song> & name);
+int main()
+{
+	vector<Song> List;
+	stringvec v;
+	string dir = "Songs";
+	read_dir(dir, v);
+	int i = 1;
+	for (string item : v)
+	{
+		if (item.length() >= 4)
+		{
+			Song s;
+			s.name = item;
+			s.ID = i;
+			List.push_back(s);
+			i++;
+		}
+	}
+
+	for (Song s : List) {
+		cout << "ID: " << s.ID << endl << "Name: " << s.name << "  **Artist: " << s.artist << endl << "Album: " << s.album << "  **Type: " << s.type << "  **Year: " << s.year << endl;
+		cout << "=====================================================================\n";
+	}
+	_chdir(".//Songs");
+	while (true) {
+		int st;
+		cout << "1-Choose      2-Search      3-Shuffle      4-Quit" << endl << "Entry: ";
+		cin >> st;
+		if (st == 1) {
+			cout << "Enter Song's ID: ";
+			int n; cin >> n;
+			Play(List, n);
+		}
+		else if (st == 2) {
+			Search(List);
+		}
+		else if (st == 3) {
+			vector<Song> temp = List;
+			scrample(temp);
+			for (Song i : temp)
+			{
+				cout << i.name << endl;
+				PlaySound(i.name.c_str(), NULL, SND_SYNC);
+			}
+		}
+		else
+		{
+			break;
+		}
+		//deleteSongs(List);
+		//sort(List.begin(), List.end(), compare);
+		//displaySongs(List);
+
+		for (Song s : List) {
+			cout << "ID: " << s.ID << endl << "Name: " << s.name << "  **Artist: " << s.artist << endl << "Album: " << s.album << "  **Type: " << s.type << "  **Year: " << s.year << endl;
+			cout << "=====================================================================\n";
+		}
+
+	}
+	system("pause");
+	return 0;
+}
+void Play(vector<Song> & name, int ID) {
+
+	int s = name.size() - (ID - 1);
+	int be = ID - 1;
+	for (int i = 0; i < s; i++)
+	{
+		cout << name.at(be).name << endl;
+		PlaySound(name[be].name.c_str(), NULL, SND_SYNC | SND_ASYNC);
+		cout << "Rate " << name[be].name << " (1-5)(0 to Exit): ";
+		cin >> name.at(be).rate;
+		if (name.at(be).rate == 0) break;
+
+		bool t = deleteSongs(name, name[be].ID);
+		if (!t)
+		{ 
+			be++;
+		}
+
+
+	}
+	cout << endl;
+}
+void scrample(vector<Song> & v)
+{
+	srand(time(NULL));
+	int s = v.size();
+	int r = rand() % s;
+	int tmp = r;
+	for (size_t j = 0; j < tmp; j++)
+	{
+
+		for (size_t i = 0; i < s; i++)
+		{
+			r = rand() % (s - i);
+			swap(v[i], v[i + r]);
+
+		}
+	}
+}
+void Stop(vector<Song> name) {
+
+}
+void Next(vector<Song> name) {
+
+}
+void Previous(vector<Song> name) {
+
+}
+void Search(vector<Song> name) {
+
+	
+	for (Song s : name) {
+
+	
+		cout << "Search by ( Name , Artist , Type , year , Album ): ";
+		cin >> s.Search;
+		if (s.Search == "Name" || "name ")
+		for (Song s : name) {
+			cout << "Enter Name Of the Song : "; 
+			cin >> s.name;
+			PlaySound(s.name.c_str(), NULL, SND_SYNC | SND_ASYNC);
+			if (s.name == "Q" || "q") {
+				break;
+			}
+
+		}
+
+
+
+
+
+
+	}
+}
+bool compare(Song s1, Song s2) {
+	return (s1.rate > s2.rate);
+}
+bool deleteSongs(vector <Song> & name, int j) {
+
+	int i = 0;
+	bool t = false;
+	for (int k = 0; k < name.size(); k++)
+	{
+		if (name[k].ID == j)
+		{
+			i = k;
+			break;
+		}
+	}
+
+	if (name.at(i).rate < 3)
+	{
+		name.erase(name.begin() + i);
+		t = true;
+
+	}
+	return t;
+
+}
+void displaySongs(vector<Song> & name) {
+	for (int i = 0; i < name.size(); i++)
+	{
+		cout << name.at(i).name << endl;
+
+	}
+}
+//Last mini Update missing (Data loss since first year)
